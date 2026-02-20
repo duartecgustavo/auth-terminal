@@ -1,0 +1,21 @@
+{
+  "name": "auth-terminal",
+  "version": "1.0.0",
+  "description": "A minimal terminal-style interface to interact with an authentication API",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "serve": "python3 -m http.server 8000 --bind 127.0.0.1"
+  },
+  "keywords": [
+    "terminal",
+    "auth",
+    "typescript",
+    "vanilla"
+  ],
+  "author": "Gustavo Castanho",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}
