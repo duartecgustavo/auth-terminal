@@ -1170,9 +1170,9 @@ class Terminal {
         } else {
           users.forEach((u: User) => {
             const maskedEmail = this.maskEmail(u.email);
-            const name = u.name || u.nickname || "Sem nome";
+            const displayName = u.nickname || u.name || "Sem apelido";
 
-            this.addOutput(`👤 ${name.padEnd(20)} ${maskedEmail}`, "muted");
+            this.addOutput(`👤 ${displayName.padEnd(20)} ${maskedEmail}`, "muted");
           });
 
           this.addOutput("");
