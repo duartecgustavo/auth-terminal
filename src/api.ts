@@ -143,8 +143,10 @@ class ApiService {
     });
   }
 
-  // Lista todos os usuários
-  async listUsers(): Promise<ApiResponse<User[]>> {
+  // Lista todos os usuários (API retorna { data: User[], pagination })
+  async listUsers(): Promise<
+    ApiResponse<{ data: User[]; pagination?: { page: number; limit: number; total: number; totalPages: number } }>
+  > {
     return this.request<any>("/users/list", {
       method: "GET",
     });

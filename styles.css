@@ -5,6 +5,16 @@
   box-sizing: border-box;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 :root {
   --bg-primary: #0d0d0d;
   --bg-secondary: #1a1a1a;
@@ -120,19 +130,26 @@ body {
   font-size: 12px;
   color: var(--text-secondary);
   font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+.terminal-title:hover {
+  color: var(--text-primary);
 }
 
 /* Corpo do terminal */
 .terminal-body {
   flex: 1;
   padding: 20px;
-  overflow-y: auto; /* Já está aqui ✅ */
+  overflow-y: auto;
   overflow-x: hidden;
   font-size: 14px;
   line-height: 1.6;
   display: flex;
   flex-direction: column;
-  min-height: 0; /* ADICIONE ESTA LINHA - força o flex a respeitar overflow */
+  min-height: 0;
+  position: relative;
 }
 
 /* Scrollbar customizada */
@@ -184,6 +201,38 @@ body {
   color: var(--text-secondary);
 }
 
+.output-line-copyable {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.output-line-copyable span {
+  flex: 0 1 auto;
+}
+
+.output-copy-btn {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: inherit;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.output-copy-btn:hover {
+  background: rgba(0, 255, 127, 0.15);
+  border-color: rgba(0, 255, 127, 0.4);
+}
+
+.output-copy-btn.copied {
+  background: rgba(0, 255, 127, 0.2);
+  border-color: var(--accent-green);
+}
+
 .input-line {
   display: flex;
   align-items: center;
@@ -194,6 +243,7 @@ body {
 .prompt {
   color: #00ff00;
   font-weight: 600;
+  cursor: pointer;
 }
 
 .command-input {
@@ -204,17 +254,7 @@ body {
   color: #e0e0e0;
   font-family: inherit;
   font-size: 16px;
-  caret-color: transparent; /* Esconde o cursor padrão */
-}
-
-.cursor {
-  color: #00ff00;
-  animation: blink 1s step-end infinite;
-  position: absolute;
-  pointer-events: none;
-  /* Posição: depois do prompt + espaço do gap */
-  left: calc(var(--cursor-position, 0) * 1ch + var(--prompt-width, 0px) + 8px);
-  top: 1px; /* Desloca 1px para baixo */
+  caret-color: #00ff00;
 }
 
 @keyframes blink {
@@ -295,6 +335,42 @@ body {
   margin: 16px 0;
 }
 
+/* Progress bar animado */
+.progress-bar-wrapper {
+  margin: 12px 0;
+}
+
+.progress-bar-message {
+  display: block;
+  font-size: 14px;
+  color: var(--accent-blue);
+  margin-bottom: 8px;
+}
+
+.progress-bar-track {
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  width: 30%;
+  background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+  border-radius: 3px;
+  animation: progressSlide 1.2s ease-in-out infinite;
+}
+
+@keyframes progressSlide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
 /* Loading state */
 .loading {
   display: inline-block;
@@ -303,6 +379,32 @@ body {
 .loading::after {
   content: "";
   animation: dots 1.5s steps(4, end) infinite;
+}
+
+/* Skeleton loading */
+.skeleton-wrapper {
+  margin: 12px 0;
+}
+
+.skeleton-line {
+  height: 14px;
+  margin: 8px 0;
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line {
+    animation: none;
+    background: var(--bg-secondary);
+  }
+}
+
+@keyframes skeletonPulse {
+  0%, 100% { background-position: 200% 0; }
+  50% { background-position: -200% 0; }
 }
 
 @keyframes dots {
@@ -332,9 +434,6 @@ body {
     padding: 16px;
   }
 
-  .cursor {
-    left: calc(var(--cursor-position, 0) * 0.9ch + 160px);
-  }
 }
 
 /* Acessibilidade */
@@ -362,7 +461,8 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(1);
-  min-width: 280px;
+  min-width: 320px;
+  max-width: 90vw;
   padding: 24px;
   text-align: center;
 
@@ -379,16 +479,66 @@ body {
 }
 
 .minimized-card h3 {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
-.minimized-card p {
-  margin: 6px 0;
-  opacity: 0.85;
+.minimized-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
 }
 
-.minimized-card button {
-  margin-top: 16px;
+.minimized-row span {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  font-size: 14px;
+  opacity: 0.95;
+  word-break: break-all;
+}
+
+.minimized-row .copy-btn {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.minimized-row .copy-btn:hover {
+  background: rgba(0, 255, 127, 0.25);
+  border-color: rgba(0, 255, 127, 0.5);
+  transform: scale(1.05);
+}
+
+.minimized-row .copy-btn.copied {
+  background: rgba(0, 255, 127, 0.3);
+  border-color: #00ff7f;
+}
+
+.minimized-divider {
+  margin: 16px 0 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: left;
+}
+
+.minimized-section {
+  margin-bottom: 0;
+}
+
+.minimized-card #restoreBtn {
+  margin-top: 20px;
   background: transparent;
   border: 1px solid #00ff7f;
   color: #00ff7f;
@@ -403,6 +553,129 @@ body {
 
 .hidden {
   display: none;
+}
+
+/* Matrix rain overlay */
+.matrix-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #000;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 12px;
+}
+
+.matrix-overlay canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.matrix-hint {
+  position: relative;
+  z-index: 1;
+  font-size: 11px;
+  color: rgba(0, 255, 0, 0.5);
+  font-family: "JetBrains Mono", monospace;
+}
+
+/* Temas de cores (botões do header) */
+body.theme-red {
+  background: linear-gradient(135deg, #2d1515 0%, #1a0a0a 50%, #0d0505 100%) !important;
+  animation: none !important;
+}
+
+body.theme-yellow {
+  background: linear-gradient(135deg, #2d2815 0%, #1a180a 50%, #0d0c05 100%) !important;
+  animation: none !important;
+}
+
+body.theme-green {
+  background: linear-gradient(135deg, #152d15 0%, #0a1a0a 50%, #050d05 100%) !important;
+  animation: none !important;
+}
+
+.terminal-container.theme-red {
+  --bg-primary: #1a0d0d;
+  --bg-secondary: #2a1515;
+  --text-primary: #ffe0e0;
+  --text-secondary: #c08080;
+  --accent-green: #ff5555;
+  --accent-blue: #ff8888;
+  --accent-red: #ff5555;
+  --accent-yellow: #ffaa66;
+  --border-color: #4a2020;
+}
+
+.terminal-container.theme-red .prompt {
+  color: #ff5555;
+}
+
+.terminal-container.theme-red .command-input {
+  caret-color: #ff5555;
+}
+
+.terminal-container.theme-yellow {
+  --bg-primary: #1a180d;
+  --bg-secondary: #2a2515;
+  --text-primary: #fff0e0;
+  --text-secondary: #c0a080;
+  --accent-green: #ffcc00;
+  --accent-blue: #ffdd66;
+  --accent-red: #ffaa66;
+  --accent-yellow: #ffcc00;
+  --border-color: #4a4020;
+}
+
+.terminal-container.theme-yellow .prompt {
+  color: #ffcc00;
+}
+
+.terminal-container.theme-yellow .command-input {
+  caret-color: #ffcc00;
+}
+
+.terminal-container.theme-green {
+  --bg-primary: #0d1a0d;
+  --bg-secondary: #152a15;
+  --text-primary: #e0ffe0;
+  --text-secondary: #80c080;
+  --accent-green: #00ff88;
+  --accent-blue: #66ffaa;
+  --accent-red: #ff6666;
+  --accent-yellow: #aaff00;
+  --border-color: #204a20;
+}
+
+.terminal-container.theme-green .prompt {
+  color: #00ff88;
+}
+
+.terminal-container.theme-green .command-input {
+  caret-color: #00ff88;
+}
+
+/* Cursor nos botões para indicar que são clicáveis */
+.terminal-buttons .btn {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.terminal-buttons .btn:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 8px currentColor;
+}
+
+.terminal-buttons .btn.active {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5), 0 0 12px currentColor;
 }
 
 @keyframes fadeInScale {

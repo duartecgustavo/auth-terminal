@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auth Terminal v1.0</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,9 +16,9 @@
     <div class="terminal-container" id="terminalContainer">
         <div class="terminal-header">
             <div class="terminal-buttons">
-                <span class="btn btn-close"></span>
-                <span class="btn btn-minimize" id="minimizeBtn"></span>
-                <span class="btn btn-maximize"></span>
+                <span class="btn btn-close" data-theme="theme-red" title="Tema vermelho"></span>
+                <span class="btn btn-minimize" data-theme="theme-yellow" title="Tema amarelo"></span>
+                <span class="btn btn-maximize" data-theme="theme-green" title="Tema verde"></span>
             </div>
             <div class="terminal-title">auth-terminal@v1.0 ~ guest</div>
         </div>
@@ -27,42 +28,78 @@
             <div class="input-line">
                 <span class="prompt">guest@terminal:~$</span>
                 <input type="text" id="command-input" class="command-input" autocomplete="off" autofocus />
-                <span class="cursor" id="cursor">|</span>
             </div>
         </div>
     </div>
 
     <div class="minimized-card hidden" id="minimizedCard">
-        <h3>Auth Terminal</h3>
-        <p>📧 contato@exemplo.com</p>
-        <p>📞 +55 (11) 99999-9999</p>
-        <p>🌐 www.exemplo.com</p>
+        <h3>Gustavo Castanho</h3>
+        <div class="minimized-row" data-copy="duartecgustavo@outlook.com">
+            <span>📧 duartecgustavo@outlook.com</span>
+            <button type="button" class="copy-btn" title="Copiar">📋</button>
+        </div>
+        <div class="minimized-row" data-copy="+55 (11) 993758665">
+            <span>📞 +55 (11) 993758665</span>
+            <button type="button" class="copy-btn" title="Copiar">📋</button>
+        </div>
+        <div class="minimized-row" data-copy="https://www.linkedin.com/in/gustavo-castanho-duarte-578127160/">
+            <span>💼 LinkedIn</span>
+            <button type="button" class="copy-btn" title="Copiar">📋</button>
+        </div>
+        <div class="minimized-row" data-copy="https://github.com/duartecgustavo">
+            <span>🐙 GitHub</span>
+            <button type="button" class="copy-btn" title="Copiar">📋</button>
+        </div>
         <button id="restoreBtn">Reabrir Terminal</button>
     </div>
 
     <script type="module" src="dist/main.js"></script>
 
-    <!-- Script do minimize fica separado -->
+    <!-- Script: temas (botões coloridos) e minimize -->
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             const terminalContainer = document.getElementById("terminalContainer");
-            const minimizeBtn = document.getElementById("minimizeBtn");
-            const minimizedCard = document.getElementById("minimizedCard");
-            const restoreBtn = document.getElementById("restoreBtn");
 
-            minimizeBtn.addEventListener("click", () => {
-                terminalContainer.classList.add("minimized");
-                setTimeout(() => {
-                    minimizedCard.classList.remove("hidden");
-                }, 300);
+            let audioCtx = null;
+            const playThemeSound = (theme) => {
+                try {
+                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (audioCtx.state === "suspended") audioCtx.resume();
+                    const now = audioCtx.currentTime;
+                    const freqs = { "theme-red": 330, "theme-yellow": 523, "theme-green": 784 };
+                    const osc = audioCtx.createOscillator();
+                    osc.type = "sine";
+                    osc.frequency.setValueAtTime(freqs[theme] || 440, now);
+                    const gain = audioCtx.createGain();
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.12);
+                } catch (_) {}
+            };
+
+            // Botões coloridos: trocar tema + persistência
+            const themes = ["theme-red", "theme-yellow", "theme-green"];
+            const applyTheme = (theme, playSound = true) => {
+                document.body.classList.remove(...themes);
+                terminalContainer.classList.remove(...themes);
+                document.body.classList.add(theme);
+                terminalContainer.classList.add(theme);
+                document.querySelectorAll(".terminal-buttons .btn").forEach(btn => {
+                    btn.classList.toggle("active", btn.dataset.theme === theme);
+                });
+                localStorage.setItem("auth-terminal-theme", theme);
+                if (playSound) playThemeSound(theme);
+            };
+            const savedTheme = localStorage.getItem("auth-terminal-theme");
+            if (savedTheme && themes.includes(savedTheme)) applyTheme(savedTheme, false);
+            document.querySelectorAll(".terminal-buttons .btn").forEach(btn => {
+                btn.addEventListener("click", () => applyTheme(btn.dataset.theme, true));
             });
 
-            restoreBtn.addEventListener("click", () => {
-                minimizedCard.classList.add("hidden");
-                setTimeout(() => {
-                    terminalContainer.classList.remove("minimized");
-                }, 100);
-            });
+            // Minimize e restore: tratados pelo terminal (prepareAndShowMinimizedCard)
         });
     </script>
 </body>
