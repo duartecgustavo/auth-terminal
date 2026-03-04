@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "A minimal terminal-style interface to interact with an authentication API",
   "scripts": {
-    "dev": "tsc --watch",
-    "build": "tsc",
+    "dev": "node scripts/inject-env.js && tsc --watch",
+    "build": "node scripts/inject-env.js && tsc",
     "serve": "python3 -m http.server 8000 --bind 127.0.0.1"
   },
   "keywords": [
@@ -16,6 +16,7 @@
   "author": "Gustavo Castanho",
   "license": "MIT",
   "devDependencies": {
+    "dotenv": "^16.4.5",
     "typescript": "^5.7.2"
   }
 }

@@ -7,9 +7,7 @@ import type {
   RegisterDTO,
   UpdateUserDTO,
 } from "./types";
-
-// Configuração da API
-const API_BASE_URL = "http://localhost:3000";
+import { API_BASE_URL } from "./config.js";
 
 class ApiService {
   private token: string | null = null;
