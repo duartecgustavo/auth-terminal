@@ -2,6 +2,8 @@
 
 Interface em estilo terminal para interagir com a API de autenticação. Experiência imersiva de linha de comando no navegador.
 
+### LINK => https://auth-terminal.vercel.app/
+
 ### 📋 Sobre o Projeto
 
 O Auth Terminal é o frontend do sistema de autenticação, apresentando uma interface que simula um terminal real. Permite registro, login, gerenciamento de perfil e listagem de usuários através de comandos, com recursos como histórico, sons de teclado e easter eggs.
